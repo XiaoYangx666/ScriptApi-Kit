@@ -1,32 +1,28 @@
 {
+    "name": "sapi-kit",
+    "version": "0.1",
+    "license": "GPL-3.0-only",
     "dependencies": {
-        "@minecraft/server": "2.1.0-beta.1.21.90-stable",
-        "@minecraft/server-ui": "2.1.0-beta.1.21.90-stable"
-    },
-    "type": "module",
-    "devDependencies": {
         "@rollup/plugin-commonjs": "^28.0.6",
         "@rollup/plugin-node-resolve": "^16.0.1",
-        "@types/adm-zip": "^0.5.7",
-        "@types/node": "^24.0.10",
         "adm-zip": "^0.5.16",
         "chalk": "^5.4.1",
         "chokidar": "^4.0.3",
+        "commander": "^14.0.0",
         "rollup": "^4.44.1",
-        "tslib": "^2.8.1",
-        "tsx": "^4.20.3",
         "typescript": "^5.7.3"
     },
-    "overrides": {
-        "@minecraft/server-ui": {
-            "@minecraft/server": "2.1.0-beta.1.21.90-stable"
-        }
+    "type": "module",
+    "devDependencies": {
+        "@types/adm-zip": "^0.5.7",
+        "@types/node": "^24.0.10"
     },
-    "scripts": {
-        "update": "npx tsx tools/update.ts",
-        "pack": "npx tsx tools/pack.ts",
-        "dev": "npx tsx tools/watch.ts",
-        "build": "npx tsx tools/build.ts",
-        "copy": "npx tsx tools/copy.ts"
+    "main": "bin/main.js",
+    "types": "bin/main.d.ts",
+    "files": [
+        "bin"
+    ],
+    "bin": {
+        "sapi-kit": "./bin/main.js"
     }
 }

@@ -8,25 +8,20 @@ import { rm } from "fs/promises";
 import path from "path";
 import { rollup } from "rollup";
 import { setTimeout } from "timers/promises";
-import { fileURLToPath } from "url";
-import { config } from "../toolconfig";
-import { formatTime } from "./func";
-import { copy2Game } from "./copy";
+import { copy2Game } from "./copy.js";
+import { formatTime, loadConfig } from "./func.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const inputDir = path.resolve(__dirname, "../cache/");
+const inputDir = "./cache/";
 const entryFile = path.join(inputDir, "/main.js");
 const outputDir = "scripts";
 
 //build主函数
-export async function runBuild(isBuilding: { value: boolean }) {
+export async function runBuild(isBuilding: { value: boolean }, isClearCache = true) {
     isBuilding.value = true;
     const startTime = Date.now();
     console.log(`${formatTime()} ${chalk.cyanBright("构建开始")} 🚀`);
-
     try {
+        const config = await loadConfig();
         console.log(`${formatTime()} ${chalk.blue("[TS]")} 编译 TypeScript...`);
         await compileTS();
         console.log(`${formatTime()} ${chalk.greenBright("[TS]")} 编译完成`);
@@ -72,6 +67,10 @@ export async function runBuild(isBuilding: { value: boolean }) {
         }
     }
 
+    if (isClearCache) {
+        clearCache();
+    }
+
     isBuilding.value = false;
 }
 
@@ -114,17 +113,13 @@ async function safeDelete(dir: string, retries = 10, delayMs = 300) {
     }
 }
 
-async function clearCache() {
+export async function clearCache() {
     console.log(`${formatTime()} ${chalk.yellow("[清理]")} 清理缓存目录...`);
     return safeDelete(inputDir, 3);
 }
 
-export async function main() {
+export async function buildMain() {
     await clearCache();
     // 启动构建
     runBuild({ value: false });
-}
-
-if (process.argv[1] === __filename) {
-    main();
 }

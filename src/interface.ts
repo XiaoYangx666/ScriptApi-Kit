@@ -1,4 +1,4 @@
-export interface toolConfig {
+export interface sapiKitConfig {
     //build配置
     /** 是否每次构建前清空 scripts 目录（建议在打包异常时开启） */
     shouldClearOutput: boolean;

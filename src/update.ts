@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "fs";
 import readline from "readline";
-import { formatTime, getManifestData } from "./func";
-import { isManifestData, packageJson } from "./interface";
+import { formatTime, getManifestData } from "./func.js";
+import { isManifestData, packageJson } from "./interface.js";
 
 const giteeRoot = "https://gitee.com/ykxyx666_admin/SAPI-Pro/raw/master";
 const githubRoot = "https://raw.githubusercontent.com/XiaoYangx666/SAPI-Pro/refs/heads/master";
@@ -52,7 +52,7 @@ function ask(question: string): Promise<string> {
     );
 }
 
-async function update() {
+export async function update() {
     console.log("🌐 请选择更新源：");
     console.log("  1. Gitee");
     console.log("  2. GitHub");
@@ -70,10 +70,8 @@ async function update() {
 
     try {
         await Promise.all([updateManifest(root), updatePackage(root)]);
-        console.log("🎉 所有更新完成！");
+        console.log("🎉 所有更新完成！请执行npm i更新依赖");
     } catch (err) {
         console.error("⚠️ 更新失败:", err);
     }
 }
-
-update();

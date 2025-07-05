@@ -3,11 +3,8 @@ import { existsSync, lstatSync } from "fs";
 import { cp, mkdir, rm } from "fs/promises";
 import os from "os";
 import path from "path";
-import { fileURLToPath } from "url";
-import { config } from "../toolconfig";
-import { formatTime, getManifestData } from "./func";
+import { formatTime, getManifestData, loadConfig } from "./func.js";
 
-const __filename = fileURLToPath(import.meta.url);
 const files = [
     "scripts",
     "manifest.json",
@@ -58,6 +55,7 @@ export async function copyFiles(root: string, dest: string, showDetail = false) 
 
 export async function copy2Game() {
     let bpFolderPath: string;
+    const config = await loadConfig();
     if (!config.gamePathMode || !config.customGameRoot) throw new Error("拷贝路径配置错误");
     //获取游戏目录
     if (config.gamePathMode === "win") {
@@ -81,8 +79,4 @@ export async function copy2Game() {
     console.log(`${formatTime()} ${chalk.magenta("[复制]")}目标目录: ${dest}`);
     await copyFiles("./", dest, false);
     console.log(`${formatTime()} ${chalk.magenta("[复制]")}复制完成`);
-}
-
-if (process.argv[1] === __filename) {
-    copy2Game();
 }

@@ -3,16 +3,14 @@ import chalk from "chalk";
 import { existsSync, rmSync } from "fs";
 import { mkdir, rm } from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
-import { config } from "../toolconfig";
-import { copyFiles } from "./copy";
-import { formatTime, getManifestData } from "./func";
+import { copyFiles } from "./copy.js";
+import { formatTime, getManifestData, loadConfig } from "./func.js";
 
-const __filename = fileURLToPath(import.meta.url);
 const packRoot = "./build";
 
-export async function pack() {
+export async function runPack() {
     console.log(`${formatTime()} ${chalk.blue("打包开始...")}`);
+    const config = await loadConfig();
     //获取manifest信息
     const manifestData = getManifestData();
     if (existsSync(packRoot)) {
@@ -42,8 +40,4 @@ export async function pack() {
         extraZip.writeZip(extraZipPath);
     }
     console.log(`${formatTime()} ${chalk.greenBright(`打包完成,输出路径: ${packRoot}`)}`);
-}
-
-if (process.argv[1] === __filename) {
-    pack();
 }
