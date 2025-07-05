@@ -2,6 +2,8 @@ export interface sapiKitConfig {
     //build配置
     /** 是否每次构建前清空 scripts 目录（建议在打包异常时开启） */
     shouldClearOutput: boolean;
+    /** 是否通过 npx 调用 tsc。建议在 tsc 无法直接调用（例如未全局安装）时启用，注意可能会降低启动速度。 */
+    useNpx?: boolean;
 
     //copy配置
     /** 构建完成后是否自动复制行为包到游戏目录 */

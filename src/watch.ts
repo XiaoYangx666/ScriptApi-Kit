@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import chokidar from "chokidar";
-import { clearCache, runBuild } from "./build.js";
+import { buildMain, clearCache, runBuild } from "./build.js";
 import { formatTime } from "./func.js";
 
 //构建状态
@@ -21,7 +21,7 @@ export function runDev() {
 
     process.stdout.write("\x1Bc"); //清空终端
     // 启动构建
-    runBuild(isBuilding, false);
+    buildMain(isBuilding, false);
 
     process.on("SIGINT", async () => {
         await clearCache();

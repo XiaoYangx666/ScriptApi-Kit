@@ -2,7 +2,7 @@
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import chalk from "chalk";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import { existsSync } from "fs";
 import { rm } from "fs/promises";
 import path from "path";
@@ -23,7 +23,7 @@ export async function runBuild(isBuilding: { value: boolean }, isClearCache = tr
     try {
         const config = await loadConfig();
         console.log(`${formatTime()} ${chalk.blue("[TS]")} 编译 TypeScript...`);
-        await compileTS();
+        await compileTS(config.useNpx ?? false);
         console.log(`${formatTime()} ${chalk.greenBright("[TS]")} 编译完成`);
         if (config.shouldClearOutput && existsSync(outputDir)) {
             console.log(`${formatTime()} ${chalk.yellow("[清理]")} 删除scripts目录...`);
@@ -80,9 +80,18 @@ class TSCError extends Error {
     }
 }
 
-function compileTS() {
+function checkTscAvailable() {
+    try {
+        execSync("tsc --version", { stdio: "ignore" });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function compileTS(usenpx: boolean) {
     return new Promise((resolve, reject) => {
-        const cmd = exec("tsc");
+        const cmd = exec(usenpx ? "npx tsc" : "tsc");
 
         cmd.stdout?.on("data", (data) => process.stdout.write(data));
         cmd.stderr?.on("data", (data) => process.stderr.write(data));
@@ -118,8 +127,11 @@ export async function clearCache() {
     return safeDelete(inputDir, 3);
 }
 
-export async function buildMain() {
+export async function buildMain(isBuilding: { value: boolean }, isClearCache = true) {
     await clearCache();
     // 启动构建
-    runBuild({ value: false });
+    if (!checkTscAvailable()) {
+        throw new Error("TypeScript未安装或环境变量错误,请使用npm i -g typescript安装");
+    }
+    runBuild(isBuilding, isClearCache);
 }

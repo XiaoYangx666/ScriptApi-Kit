@@ -17,7 +17,7 @@ program
     .command("build")
     .description("构建行为包")
     .action(() => {
-        buildMain();
+        buildMain({ value: false });
     });
 
 // 打包项目
