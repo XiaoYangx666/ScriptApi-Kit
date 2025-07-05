@@ -32,15 +32,26 @@ export interface dependency {
     version: string;
 }
 
+type version = [number, number, number];
 export interface manifest {
     format_version: number;
     header: {
         description: string;
         name: string;
         uuid: string;
-        version: [number, number, number];
-        min_engine_version: [number, number, number];
+        version: version;
+        min_engine_version: version;
     };
+    modules: [
+        {
+            description: string;
+            type: string;
+            language: string;
+            uuid: string;
+            version: version;
+            entry: string;
+        }
+    ];
     dependencies: dependency[];
 }
 

@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
-import readline from "readline";
-import { formatTime, getManifestData } from "./func.js";
+
+import { input, formatTime, getManifestData } from "./func.js";
 import { isManifestData, packageJson } from "./interface.js";
 
 const giteeRoot = "https://gitee.com/ykxyx666_admin/SAPI-Pro/raw/master";
@@ -42,21 +42,11 @@ async function updatePackage(root: string) {
     logDone("package.json 更新完成");
 }
 
-function ask(question: string): Promise<string> {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    return new Promise((resolve) =>
-        rl.question(question, (answer) => {
-            rl.close();
-            resolve(answer.trim());
-        })
-    );
-}
-
 export async function update() {
     console.log("🌐 请选择更新源：");
     console.log("  1. Gitee");
     console.log("  2. GitHub");
-    const ans = await ask("请输入序号 (1 / 2): ");
+    const ans = await input("请输入序号 (1 / 2): ");
 
     let root: string;
     if (ans === "1") {

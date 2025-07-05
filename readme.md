@@ -14,9 +14,17 @@ npm i sapi-kit
 
 ### 🚀 快速开始
 
-建议使用官方模板快速初始化项目：
+先全局安装:
 
-👉 [点击创建模板项目](https://gitee.com/ykxyx666_admin/sapi-kit_template)
+```bash
+npm i -g sapi-kit
+```
+
+再在项目目录中执行
+
+```bash
+sapi-kit init
+```
 
 ---
 
@@ -32,6 +40,8 @@ npm i sapi-kit
     - 创建 [`sapi-kit.config.mjs`](https://gitee.com/ykxyx666_admin/sapi-kit_template/blob/master/sapi-kit.config.mjs)
     - 创建 [`tsconfig.json`](https://gitee.com/ykxyx666_admin/sapi-kit_template/blob/master/tsconfig.json)
 
+注:配置文件请参考[模板包](https://gitee.com/ykxyx666_admin/sapi-kit_template)。
+
 配置完成后，即可开始使用命令。
 
 ---
@@ -45,6 +55,7 @@ npm i sapi-kit
 | `dev`    | 启动监听模式         |
 | `copy`   | 复制行为包到游戏目录 |
 | `update` | 更新配置/依赖资源    |
+| `init`   | 一键初始化项目       |
 
 ---
 

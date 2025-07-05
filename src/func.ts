@@ -1,8 +1,10 @@
 import chalk from "chalk";
+import { spawn } from "child_process";
 import { existsSync, readFileSync } from "fs";
-import { isManifestData, sapiKitConfig } from "./interface.js";
 import path from "path";
+import readline from "readline";
 import { pathToFileURL } from "url";
+import { isManifestData, sapiKitConfig } from "./interface.js";
 
 // 工具函数：格式化时间
 export function formatTime(date = new Date()) {
@@ -43,4 +45,28 @@ export async function loadConfig(configpath = defaultConfigPath) {
     }
     const config = await import(configUrl.href);
     return (config.default || config) as sapiKitConfig;
+}
+
+export function input(question: string): Promise<string> {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    return new Promise((resolve) =>
+        rl.question(question, (answer) => {
+            rl.close();
+            resolve(answer.trim());
+        })
+    );
+}
+
+export function runCommand(command: string) {
+    return new Promise((resolve, reject) => {
+        const cmd = spawn(command, { shell: true, stdio: "inherit" });
+
+        cmd.on("close", (code) => {
+            if (code === 0) {
+                resolve(1);
+            } else {
+                reject(new Error(`命令执行失败，退出码: ${code}`));
+            }
+        });
+    });
 }

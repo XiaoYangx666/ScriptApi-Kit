@@ -1,6 +1,6 @@
 {
     "name": "sapi-kit",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "license": "GPL-3.0-only",
     "author": "XiaoYangx666",
     "description": "A development toolkit for Minecraft Bedrock Edition Script API",
@@ -15,7 +15,8 @@
         "chalk": "^5.4.1",
         "chokidar": "^4.0.3",
         "commander": "^14.0.0",
-        "rollup": "^4.44.1"
+        "rollup": "^4.44.1",
+        "uuid": "^11.1.0"
     },
     "type": "module",
     "devDependencies": {
