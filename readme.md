@@ -1,6 +1,6 @@
 ## 🌟 ScriptApi-Kit
 
-> 基岩版 ScriptApi 的轻量实用工具集，让开发更高效。
+基岩版 ScriptApi 的轻量实用工具集，让开发更高效。
 
 ---
 

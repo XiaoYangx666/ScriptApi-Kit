@@ -1,7 +1,13 @@
 {
     "name": "sapi-kit",
-    "version": "0.1",
+    "version": "0.1.1",
     "license": "GPL-3.0-only",
+    "author": "XiaoYangx666",
+    "description": "A development toolkit for Minecraft Bedrock Edition Script API",
+    "repository": {
+        "type": "git",
+        "url": "https://gitee.com/ykxyx666_admin/script-api-kit.git"
+    },
     "dependencies": {
         "@rollup/plugin-commonjs": "^28.0.6",
         "@rollup/plugin-node-resolve": "^16.0.1",
@@ -24,5 +30,23 @@
     ],
     "bin": {
         "sapi-kit": "./bin/main.js"
-    }
+    },
+    "keywords": [
+        "minecraft",
+        "bedrock",
+        "bedrock-edition",
+        "scriptapi",
+        "script-api",
+        "minecraft-bedrock",
+        "minecraft-addon",
+        "mcbe",
+        "mcbedrock",
+        "toolkit",
+        "development",
+        "dev-tools",
+        "scripting",
+        "modding",
+        "game-dev",
+        "utilities"
+    ]
 }
