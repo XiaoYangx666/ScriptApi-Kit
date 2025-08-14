@@ -1,6 +1,6 @@
 {
     "name": "sapi-kit",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "license": "GPL-3.0-only",
     "author": "XiaoYangx666",
     "description": "A development toolkit for Minecraft Bedrock Edition Script API",

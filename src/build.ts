@@ -38,7 +38,13 @@ export async function runBuild(isBuilding: { value: boolean }, isClearCache = tr
                     include: /node_modules/,
                 }),
             ],
-            external: /^@minecraft.+/,
+            //排除
+            external: [
+                /^@minecraft\/server.*/,
+                "@minecraft/common",
+                "@minecraft/debug-utilities",
+                "@minecraft/diagnostics",
+            ],
             onwarn(warning, warn) {
                 if (warning.code === "CIRCULAR_DEPENDENCY") return;
                 warn(warning);
