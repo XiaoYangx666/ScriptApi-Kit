@@ -8,6 +8,7 @@ import { rm } from "fs/promises";
 import path from "path";
 import { rollup } from "rollup";
 import { setTimeout } from "timers/promises";
+import { replaceTscAliasPaths } from "tsc-alias";
 import { copy2Game } from "./copy.js";
 import { formatTime, loadConfig } from "./func.js";
 
@@ -22,13 +23,19 @@ export async function runBuild(isBuilding: { value: boolean }, isClearCache = tr
     console.log(`${formatTime()} ${chalk.cyanBright("构建开始")} 🚀`);
     try {
         const config = await loadConfig();
+        //编译
         console.log(`${formatTime()} ${chalk.blue("[TS]")} 编译 TypeScript...`);
         await compileTS(config.useNpx ?? false);
         console.log(`${formatTime()} ${chalk.greenBright("[TS]")} 编译完成`);
+        //替换路径
+        await replaceTscAliasPaths();
+        console.log(`${formatTime()} ${chalk.blueBright("[tsc-alias]")} 路径替换完成`);
+        //清理scripts
         if (config.shouldClearOutput && existsSync(outputDir)) {
             console.log(`${formatTime()} ${chalk.yellow("[清理]")} 删除scripts目录...`);
             await safeDelete(outputDir, 4);
         }
+        //打包
         console.log(`${formatTime()} ${chalk.blue("[Rollup]")} 开始打包...`);
         const bundle = await rollup({
             input: entryFile,
@@ -72,7 +79,7 @@ export async function runBuild(isBuilding: { value: boolean }, isClearCache = tr
             console.error(chalk.red(err.stack || err.message));
         }
     }
-
+    //清理cache
     if (isClearCache) {
         clearCache();
     }

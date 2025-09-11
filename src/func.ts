@@ -47,6 +47,7 @@ export async function loadConfig(configpath = defaultConfigPath) {
     return (config.default || config) as sapiKitConfig;
 }
 
+/**输入 */
 export function input(question: string): Promise<string> {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     return new Promise((resolve) =>
@@ -57,6 +58,7 @@ export function input(question: string): Promise<string> {
     );
 }
 
+/**运行指定命令 */
 export function runCommand(command: string) {
     return new Promise((resolve, reject) => {
         const cmd = spawn(command, { shell: true, stdio: "inherit" });

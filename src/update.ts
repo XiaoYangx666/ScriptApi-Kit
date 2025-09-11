@@ -1,5 +1,4 @@
 import { readFileSync, writeFileSync } from "fs";
-
 import { formatTime, getManifestData } from "./func.js";
 import { isManifestData, packageJson } from "./interface.js";
 
