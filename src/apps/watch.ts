@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import chokidar from "chokidar";
 import { buildMain, clearCache, runBuild } from "./build.js";
-import { formatTime } from "./func.js";
+import { formatTime } from "../utils/func.js";
 
 //构建状态
 const isBuilding = { value: false };

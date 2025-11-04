@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "module": "esnext",
         "lib": ["ESNext", "DOM"],
         "types": [],
@@ -11,13 +11,14 @@
         "pretty": true,
         "forceConsistentCasingInFileNames": true,
         "preserveConstEnums": true,
-        "strict": false,
+        "strict": true,
         "noImplicitAny": true,
         "outDir": "bin",
         "rootDir": "src",
         "baseUrl": "src",
         "allowJs": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true
     },
     "include": ["src"],
     "compileOnSave": false
