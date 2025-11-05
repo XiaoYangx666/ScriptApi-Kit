@@ -6,7 +6,7 @@ import { exec } from "child_process";
 import { existsSync } from "fs";
 import { rm } from "fs/promises";
 import path from "path";
-import { rollup } from "rollup";
+import { rollup, RollupCache } from "rollup";
 import { setTimeout } from "timers/promises";
 import { replaceTscAliasPaths } from "tsc-alias";
 import { packType } from "../interface.js";
@@ -18,7 +18,8 @@ import { copyToGame } from "./copy.js";
 //build主函数
 export async function runBuild(
     isBuilding: { value: boolean },
-    isClearCache = true
+    isClearCache = true,
+    rollupCache?: { value?: RollupCache }
 ) {
     isBuilding.value = true;
 
@@ -69,6 +70,7 @@ export async function runBuild(
                 if (warning.code === "CIRCULAR_DEPENDENCY") return;
                 warn(warning);
             },
+            cache: rollupCache?.value,
         });
 
         await bundle.write({
@@ -77,6 +79,10 @@ export async function runBuild(
             preserveModules: true,
             preserveModulesRoot: config.cacheDir,
         });
+        //保存cache
+        if (rollupCache != undefined) {
+            rollupCache.value = bundle.cache;
+        }
 
         await bundle.close();
         console.log(

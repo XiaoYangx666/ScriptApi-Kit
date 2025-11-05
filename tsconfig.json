@@ -15,7 +15,6 @@
         "noImplicitAny": true,
         "outDir": "bin",
         "rootDir": "src",
-        "baseUrl": "src",
         "allowJs": true,
         "allowSyntheticDefaultImports": true,
         "skipLibCheck": true

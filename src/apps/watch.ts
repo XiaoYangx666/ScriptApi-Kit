@@ -2,9 +2,11 @@ import chalk from "chalk";
 import chokidar from "chokidar";
 import { buildMain, clearCache, runBuild } from "./build.js";
 import { formatTime } from "../utils/func.js";
+import { RollupCache } from "rollup";
 
 //构建状态
 const isBuilding = { value: false };
+const cache: { value: RollupCache | undefined } = { value: undefined };
 
 export function runDev() {
     const watcher = chokidar.watch("src", { ignoreInitial: true });
@@ -16,7 +18,7 @@ export function runDev() {
         }
         process.stdout.write("\x1Bc"); //清空终端
         console.log(`${formatTime()} ${chalk.yellow("[变更]")} ${filePath}`);
-        runBuild(isBuilding, false);
+        runBuild(isBuilding, false, cache);
     });
 
     process.stdout.write("\x1Bc"); //清空终端

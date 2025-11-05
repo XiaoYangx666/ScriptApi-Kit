@@ -1,5 +1,5 @@
 import { Option } from "@clack/prompts";
-import { NpmVersionPatterns } from "interface";
+import { NpmVersionPatterns } from "../interface";
 
 export const npmRegistries: Option<string>[] = [
     { label: "官方源", value: "https://registry.npmjs.org/" },

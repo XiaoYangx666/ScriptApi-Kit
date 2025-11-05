@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { packageJsonData } from "interface";
+import { packageJsonData } from "../interface";
 import path from "path";
 
 class PackageJsonReadError extends Error {
