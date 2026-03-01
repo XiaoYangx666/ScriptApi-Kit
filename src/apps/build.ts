@@ -30,8 +30,10 @@ export async function runBuild(
     try {
         const config = await ConfigManager.get();
         //编译
-        console.log(`${formatTime()} ${chalk.blue("[TS]")} 编译 TypeScript...`);
-        await compileTS(config.useNpx ?? false);
+        console.log(
+            `${formatTime()} ${chalk.blue("[TS]")} 编译 TypeScript... ${config.useTsGo ? chalk.yellow("(TSGO)") : ""}`
+        );
+        await compileTS(config.useNpx ?? false, config.useTsGo ?? false);
         console.log(`${formatTime()} ${chalk.greenBright("[TS]")} 编译完成`);
         //替换路径
         await replaceTscAliasPaths();
@@ -112,9 +114,10 @@ export async function runBuild(
     isBuilding.value = false;
 }
 
-function compileTS(usenpx: boolean) {
+function compileTS(usenpx: boolean, useTsGo: boolean) {
     return new Promise((resolve, reject) => {
-        const cmd = exec(usenpx ? "npx tsc" : "tsc");
+        const compiler = useTsGo ? "tsgo" : "tsc";
+        const cmd = exec(usenpx ? `npx ${compiler}` : compiler);
 
         // 捕获命令不存在或 spawn 失败
         cmd.on("error", (err: any) => {

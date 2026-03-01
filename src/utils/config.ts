@@ -1,10 +1,9 @@
 import { existsSync } from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
+import { resolveGameRoot } from "../apps/copy.js";
 import { packType, sapiKitConfig } from "../interface.js";
 import { ConfigLoadError } from "./errors.js";
-import chalk from "chalk";
-import { resolveGameRoot } from "../apps/copy.js";
 
 export class ConfigManager {
     private static defaultConfigPath = "./sapi-kit.config.mjs";
@@ -68,7 +67,7 @@ export class ConfigManager {
         const results: string[] = [];
         for (const [key, fn] of Object.entries(configCheckList) as [
             keyof sapiKitConfig,
-            any
+            any,
         ][]) {
             const msg = await fn(config[key], config);
             if (msg) results.push(`${key}: ` + msg);

@@ -17,6 +17,8 @@ export interface sapiKitConfig {
     shouldClearOutput?: boolean;
     /** 是否通过 npx 调用 tsc。建议在 tsc 无法直接调用（例如未全局安装）时启用，注意可能会降低启动速度。 */
     useNpx?: boolean;
+    /**是否使用Typescript Go版本进行编译 */
+    useTsGo?: boolean;
 
     //copy配置
     /** 构建完成后是否自动复制行为包到游戏目录 */
@@ -70,7 +72,7 @@ export interface manifest {
             uuid: string;
             version: version;
             entry: string;
-        }
+        },
     ];
     dependencies: dependency[];
 }
@@ -82,7 +84,7 @@ interface overrides {
 }
 
 export interface packageJsonData {
-    dependencies: Record<string, string>;
+    dependencies: Record<string, string> | undefined;
     overrides: overrides;
 }
 

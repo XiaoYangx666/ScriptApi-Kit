@@ -63,11 +63,11 @@ export function cliMain() {
         .command("version")
         .description("查看当前版本")
         .action(() => {
-            console.log("版本 0.2.0");
+            console.log("版本 0.2.1");
         });
     program
         .command("check")
-        .description("查看当前配置")
+        .description("检查当前配置")
         .action(async () => {
             try {
                 const messages = await ConfigManager.checkConfig();

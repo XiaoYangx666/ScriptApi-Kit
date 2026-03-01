@@ -3,6 +3,7 @@ import {
     intro,
     isCancel,
     log,
+    multiselect,
     Option,
     outro,
     select,
@@ -54,9 +55,12 @@ async function updateManifestModules(newDeps: Record<string, string>) {
 /**从package.json中提取有记录的依赖 */
 function getRecordedPackages(pkgData: packageJsonData) {
     const recordedPacks = Object.keys(PackPattern);
-    return Object.keys(pkgData.dependencies).filter((dep) =>
-        recordedPacks.includes(dep)
-    );
+    if (pkgData.dependencies) {
+        return Object.keys(pkgData.dependencies).filter((dep) =>
+            recordedPacks.includes(dep)
+        );
+    }
+    return [];
 }
 
 interface PackWithVersion {
@@ -118,12 +122,18 @@ async function chooseDepType(packs: PackWithVersion[]) {
         selectedType;
     log.info(chalk.blue(`将更新为 ${selectedLabel} ：`));
 
-    for (const p of packs) {
-        log.message(
-            ` • ${p.name} ${chalk.gray(
+    const selectedPacks = await multiselect<PackWithVersion>({
+        message: "选择要更新的包",
+        options: packs.map((p) => ({
+            label: `${p.name} ${chalk.gray(
                 p.version?.[selectedType] ?? "版本不存在"
-            )}`
-        );
+            )}`,
+            value: p,
+        })),
+        initialValues: packs,
+    });
+    if (typeof selectedPacks === "symbol") {
+        process.exit(0);
     }
 
     const shouldUp = await confirm({
@@ -135,7 +145,7 @@ async function chooseDepType(packs: PackWithVersion[]) {
     }
 
     const newDeps = Object.fromEntries(
-        packs
+        selectedPacks
             .filter((p) => {
                 if (!p.version?.[selectedType]) {
                     log.error(

@@ -97,8 +97,10 @@ async function updateManifest(name: string, description: string) {
 
 async function clearDependencies(keepPacks: string[]) {
     const data = packageJsonManager.read();
-    for (const dep of Object.keys(data.dependencies)) {
-        if (!keepPacks.includes(dep)) delete data.dependencies[dep];
+    if (data.dependencies) {
+        for (const dep of Object.keys(data.dependencies)) {
+            if (!keepPacks.includes(dep)) delete data.dependencies[dep];
+        }
     }
     for (const dep of Object.keys(data.overrides)) {
         if (!keepPacks.includes(dep)) delete data.overrides[dep];
