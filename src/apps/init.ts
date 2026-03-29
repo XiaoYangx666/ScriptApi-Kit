@@ -102,8 +102,10 @@ async function clearDependencies(keepPacks: string[]) {
             if (!keepPacks.includes(dep)) delete data.dependencies[dep];
         }
     }
-    for (const dep of Object.keys(data.overrides)) {
-        if (!keepPacks.includes(dep)) delete data.overrides[dep];
+    if (data.overrides) {
+        for (const dep of Object.keys(data.overrides)) {
+            if (!keepPacks.includes(dep)) delete data.overrides[dep];
+        }
     }
     packageJsonManager.write(data);
 }

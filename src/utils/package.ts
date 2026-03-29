@@ -57,12 +57,14 @@ class PackageJsonManager {
         data.dependencies = { ...data.dependencies, ...newDeps };
         //更新overrides
         const newDepMap = new Map(Object.entries(newDeps));
-        for (let overrideKey of Object.keys(data.overrides)) {
-            const overrideDeps = data.overrides[overrideKey];
-            for (let itemKey of Object.keys(overrideDeps)) {
-                const item = newDepMap.get(itemKey);
-                if (item) {
-                    overrideDeps[itemKey] = item;
+        if (data.overrides) {
+            for (let overrideKey of Object.keys(data.overrides)) {
+                const overrideDeps = data.overrides[overrideKey];
+                for (let itemKey of Object.keys(overrideDeps)) {
+                    const item = newDepMap.get(itemKey);
+                    if (item) {
+                        overrideDeps[itemKey] = item;
+                    }
                 }
             }
         }

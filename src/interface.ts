@@ -84,8 +84,8 @@ interface overrides {
 }
 
 export interface packageJsonData {
-    dependencies: Record<string, string> | undefined;
-    overrides: overrides;
+    dependencies?: Record<string, string> | undefined;
+    overrides?: overrides;
 }
 
 export enum packType {
