@@ -1,10 +1,7 @@
+import { cancel, isCancel } from "@clack/prompts";
 import chalk from "chalk";
 import { spawn } from "child_process";
-import { existsSync } from "fs";
 import path from "path";
-import { pathToFileURL } from "url";
-import { packType, sapiKitConfig } from "../interface.js";
-import { ConfigLoadError } from "./errors.js";
 
 // 工具函数：格式化时间
 export function formatTime(date = new Date()) {
@@ -27,3 +24,13 @@ export function runCommand(command: string) {
         });
     });
 }
+
+/**取消时退出 */
+export function exitIfCancel<T>(value: T): Exclude<T, symbol> {
+    if (isCancel(value)) {
+        cancel("操作已取消");
+        process.exit(0);
+    }
+    return value as Exclude<T, symbol>;
+}
+

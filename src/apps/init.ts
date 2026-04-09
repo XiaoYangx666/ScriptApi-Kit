@@ -1,21 +1,15 @@
-import {
-    intro,
-    isCancel,
-    log,
-    multiselect,
-    outro,
-    select,
-    text,
-} from "@clack/prompts";
+import { intro, log, outro } from "@clack/prompts";
 import AdmZip from "adm-zip";
 import chalk from "chalk";
 import { existsSync } from "fs";
 import { v4 as uuidv4 } from "uuid";
+import { confirmForm } from "../forms/common.js";
+import { nameAndDesForm, selectMcPack } from "../forms/init.js";
+import { chooseDepTypeForm, selectRegistryForm } from "../forms/update.js";
 import { bpManifest } from "../utils/manifest.js";
 import { NpmPackManager } from "../utils/npmPack.js";
 import { packageJsonManager } from "../utils/package.js";
-import { npmRegistries } from "../utils/static.js";
-import { updatePackVersion } from "./update.js";
+import { getDepsForPacks, updateDeps } from "./update.js";
 
 const templateUrl =
     "https://gitee.com/ykxyx666_admin/sapi-kit_template/releases/download/latest/output.zip";
@@ -39,28 +33,12 @@ export async function init(overwrite: boolean) {
         log.step(chalk.cyan("🚀开始初始化项目..."));
 
         const buffer = await downloadZip(templateUrl);
-        const name = await text({
-            message: "请输入行为包名称：",
-            validate(value) {
-                if (value.trim().length == 0) {
-                    return "行为包名不能为空";
-                }
-            },
-        });
-        if (isCancel(name)) process.exit(0);
-        const description = await text({
-            message: "请输入行为包描述：",
-            validate(value) {
-                if (value.trim().length == 0) {
-                    return "描述不能为空";
-                }
-            },
-        });
-        if (isCancel(description)) process.exit(0);
+
+        const result = await nameAndDesForm();
 
         extractZip(buffer, overwrite);
-        await updateManifest(name, description);
-        await installDependencies();
+        await updateManifest(result.name, result.description);
+        await installDependencies(true);
 
         outro(chalk.green("✅ 项目初始化完成"));
     } catch (err) {
@@ -110,48 +88,49 @@ async function clearDependencies(keepPacks: string[]) {
     packageJsonManager.write(data);
 }
 
-async function installDependencies() {
-    const registry = await select({
-        message: "请选择依赖源",
-        options: npmRegistries,
-        initialValue: npmRegistries[1].value,
-    });
-
-    if (isCancel(registry)) {
-        process.exit(0);
+export async function installDependencies(isInit = false) {
+    if (!isInit) {
+        intro("安装mc依赖");
     }
-
+    //选择源
+    const registry = await selectRegistryForm();
     const packManager = new NpmPackManager(registry);
+    //选择要安装的包
+    const packs = await selectMcPack();
 
-    const packs = await multiselect({
-        message: "选择要安装的mc包(用空格选择)",
-        options: [
-            {
-                value: "@minecraft/server",
-                label: "@minecraft/server",
-                hint: "必装",
-            },
-            {
-                value: "@minecraft/server-ui",
-                label: "@minecraft/server-ui",
-                hint: "表单操作",
-            },
-            {
-                value: "sapi-pro",
-                label: "SAPI-Pro",
-                hint: "行为包推荐",
-            },
-        ],
-    });
-
-    if (isCancel(packs)) {
-        process.exit(0);
+    //清除已有依赖
+    if (isInit) {
+        await clearDependencies(packs);
     }
 
-    await clearDependencies(packs);
-    await updatePackVersion(packs, packManager);
+    //获取包版本信息
+    log.step(`🌐 从 ${chalk.blue(packManager.registry)} 获取包信息...`);
+    const packsWithVersion = await packManager.getLatestVersionsForPacks(packs);
 
+    //选择依赖类型
+    const depType = await chooseDepTypeForm(packsWithVersion);
+    const deps = await getDepsForPacks(packsWithVersion, depType);
+
+    log.info(`将安装 ${depType.name} ：`);
+
+    const list = Object.entries(deps)
+        .map(([module, version]) => {
+            return `${chalk.cyan(module)}${chalk.gray("@")}${chalk.yellow(version)}`;
+        })
+        .join("\n");
+
+    log.message(list);
+    await confirmForm(`确定安装${depType.name}吗`);
+
+    //更新依赖
+
+    await updateDeps(deps);
+
+    //npm i
     log.step(chalk.blue("安装依赖中，请稍候..."));
-
     await packManager.install();
+
+    if (!isInit) {
+        outro("✅ 安装mc依赖完成");
+    }
 }

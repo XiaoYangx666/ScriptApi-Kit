@@ -1,7 +1,7 @@
 import { URL } from "url";
 import { npmPackInfo, NpmVersionPatterns, versionType } from "../interface";
-import { mcUniversalPattern, PackPattern } from "./static.js";
 import { runCommand } from "./func.js";
+import { mcUniversalPattern, PackPattern } from "./static.js";
 
 export class NpmPackManager {
     constructor(public readonly registry: string) {}
@@ -16,10 +16,11 @@ export class NpmPackManager {
         return Object.keys(data.versions).reverse();
     }
 
-    /**获取分类版本 */
+    /**获取分类的最新版本 */
     async getCategorizedVersions(
         packName: string
     ): Promise<CategorizedVersion | undefined> {
+        //获取pattern
         let pattern: NpmVersionPatterns;
         if (PackPattern[packName] != undefined) {
             pattern = PackPattern[packName];
@@ -28,6 +29,7 @@ export class NpmPackManager {
         } else {
             return undefined;
         }
+        //匹配最新版本
         const versions = await this.getNpmPackVersions(packName);
         const stable = versions.find((v) => pattern.stable.test(v));
         const beta = versions.find((v) => pattern.beta.test(v));
@@ -36,10 +38,30 @@ export class NpmPackManager {
         return { stable, beta, latest };
     }
 
+    /**获取多个包的最新版本 */
+    async getLatestVersionsForPacks(
+        packs: string[]
+    ): Promise<PackWithVersion[]> {
+        const latestVersions = await Promise.all(
+            packs.map(async (name) => {
+                const versions = await this.getCategorizedVersions(name);
+                return { name, version: versions };
+            })
+        );
+        return latestVersions.filter((t) => t.version != undefined);
+    }
+
     /**安装依赖 */
     async install() {
-        await runCommand(`npm install --registry ${this.registry}`);
+        await runCommand(
+            `npm install --registry ${this.registry} --legacy-peer-deps`
+        );
     }
+}
+
+export interface PackWithVersion {
+    name: string;
+    version?: CategorizedVersion;
 }
 
 export type CategorizedVersion = {

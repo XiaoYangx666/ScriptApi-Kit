@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { packageJsonData } from "../interface";
 import path from "path";
+import { PackPattern } from "./static.js";
 
 class PackageJsonReadError extends Error {
     constructor(mes: string, path: string, options?: ErrorOptions) {
@@ -48,6 +49,19 @@ class PackageJsonManager {
             throw new Error("无法找到package.json");
         }
         writeFileSync(this.filePath, JSON.stringify(data, null, 4));
+    }
+
+    /**从dependencies中获取受支持的minecraft包 */
+    public getSupportedPackages() {
+        const pkgData = this.read();
+        const supportedPacks = Object.keys(PackPattern);
+
+        if (pkgData.dependencies) {
+            return Object.keys(pkgData.dependencies).filter((dep) =>
+                supportedPacks.includes(dep)
+            );
+        }
+        return [];
     }
 
     /**更新依赖项 */
