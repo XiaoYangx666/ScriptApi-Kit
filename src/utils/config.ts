@@ -5,6 +5,11 @@ import { resolveGameRoot } from "../apps/copy.js";
 import { packType, sapiKitConfig } from "../interface.js";
 import { ConfigLoadError } from "./errors.js";
 
+export const defualtGen: sapiKitConfig["gen"] = {
+    manifest: 3,
+    format_version: "1.26.0",
+};
+
 export class ConfigManager {
     private static defaultConfigPath = "./sapi-kit.config.mjs";
     private static configCache: sapiKitConfig | null = null;
@@ -28,9 +33,12 @@ export class ConfigManager {
             const configModule = await import(pathToFileURL(absPath).href);
             const finalConfig = configModule.default as sapiKitConfig;
             // 缓存
-            this.configCache = finalConfig;
+            this.configCache = {
+                ...finalConfig,
+                gen: { ...defualtGen, ...finalConfig.gen },
+            };
 
-            return { ...finalConfig };
+            return this.configCache;
         } catch (err) {
             throw new ConfigLoadError(
                 `加载配置文件失败: ${(err as Error).message}`

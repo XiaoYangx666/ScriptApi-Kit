@@ -1,7 +1,8 @@
-import { existsSync, readFileSync } from "fs";
-import { writeFile } from "fs/promises";
-import { manifest, packType } from "../interface.js";
+import { log } from "@clack/prompts";
+import { packType } from "../interface.js";
+import { manifest } from "../schemas/manifest.js";
 import { ConfigManager } from "./config.js";
+import { JsonUtil } from "./json.js";
 
 class ManifestReadError extends Error {
     constructor(mes: string, options?: ErrorOptions) {
@@ -10,7 +11,7 @@ class ManifestReadError extends Error {
     }
 }
 
-class ManifestManager {
+export class ManifestManager {
     private filePath?: string;
     readonly type: packType;
 
@@ -28,23 +29,12 @@ class ManifestManager {
         return this.filePath;
     }
 
-    /**获取行为包/资源包的manifest.json数据 */
+    /** 获取 manifest.json */
     async read() {
         const manifestPath = await this.getPath();
 
-        if (!existsSync(manifestPath)) {
-            throw new ManifestReadError(
-                `读取manifest.json失败,文件不存在：` + manifestPath
-            );
-        }
-
         try {
-            const data = readFileSync(manifestPath, { encoding: "utf-8" });
-            const jsondata = JSON.parse(data);
-            if (!isManifestData(jsondata)) {
-                throw new ManifestReadError("读取manifest.json失败,类型错误");
-            }
-            return jsondata;
+            return JsonUtil.read<manifest>(manifestPath, isManifestData);
         } catch (err) {
             throw new ManifestReadError("读取manifest.json失败", {
                 cause: err,
@@ -52,46 +42,104 @@ class ManifestManager {
         }
     }
 
-    /**写入文件 */
+    /** 写入 manifest.json */
     async write(data: manifest) {
         const manifestPath = await this.getPath();
-        if (!existsSync(manifestPath)) {
-            throw new ManifestReadError(
-                `manifest.json文件不存在：` + manifestPath
-            );
+
+        try {
+            JsonUtil.write(manifestPath, data, { space: 4 });
+        } catch (err) {
+            throw new ManifestReadError("写入manifest.json失败", {
+                cause: err,
+            });
         }
-        await writeFile(manifestPath, JSON.stringify(data, null, 4));
     }
 
-    /**更新manifest字段 */
+    /** 更新 manifest */
     async update(newData: Partial<manifest>) {
-        let data = await this.read();
+        const data = await this.read();
+        // header
+        if (newData.header) {
+            data.header = { ...data.header, ...newData.header };
+        }
+        // format_version
+        if (newData.format_version !== undefined) {
+            data.format_version = newData.format_version;
+        }
+        // dependencies
+        if (newData.dependencies?.length) {
+            const newDeps = newData.dependencies;
 
-        //更新
-        data.header = { ...data.header, ...newData.header };
-        data.format_version = newData.format_version ?? data.format_version;
-        //更新依赖版本
-        if (newData.dependencies && newData.dependencies.length) {
-            const newDepsMap = new Map(
-                newData.dependencies.map((t) => [t.module_name, t.version])
-            );
-            for (const dependency of data.dependencies) {
-                const version = newDepsMap.get(dependency.module_name);
-                if (version) {
-                    dependency.version = version;
+            if (!data.dependencies) {
+                data.dependencies = newData.dependencies;
+            } else {
+                for (const dependency of data.dependencies) {
+                    const version = newDeps.find(
+                        (t) => t.module_name == dependency.module_name
+                    )?.version;
+                    if (typeof version == "string") {
+                        dependency.version = version;
+                    }
                 }
             }
         }
 
-        bpManifest.write(data);
+        await this.write(data);
+    }
+
+    /**将版本对象转为manifest中deps数组 */
+    static toDepList(newDeps: Record<string, string>) {
+        const entries = Object.entries(newDeps);
+        const deps = entries
+            .map(([name, version]) => ({
+                module_name: name,
+                version: getBaseVersion(version),
+            }))
+            .filter((d) => d.version != undefined);
+
+        return deps as { module_name: string; version: string }[];
     }
 }
 
 export const bpManifest = new ManifestManager(packType.BP);
 export const rpManifest = new ManifestManager(packType.RP);
 
-export function isManifestData(data: any): data is manifest {
+export function isManifestData(data: unknown): data is manifest {
+    if (typeof data !== "object" || data === null) return false;
+
+    const obj = data as any;
+
     return (
-        data != undefined && data.header && data.header.name && data.header.uuid
+        typeof obj.format_version === "number" &&
+        typeof obj.header === "object" &&
+        obj.header !== null &&
+        typeof obj.header.description === "string" &&
+        typeof obj.header.name === "string" &&
+        typeof obj.header.uuid === "string" &&
+        obj.header.version !== undefined &&
+        obj.header.min_engine_version !== undefined &&
+        Array.isArray(obj.modules) &&
+        Array.isArray(obj.dependencies)
     );
+}
+
+function getBaseVersion(version: string) {
+    if (version.includes("preview")) {
+        const match = version.match(/^(\d+.\d+.\d+-[^\.]+)/);
+        if (!match?.[1]) {
+            log.error(`无法获取${version}的版本号`);
+            return undefined;
+        }
+        return match[1];
+    }
+    if (version.includes("beta")) {
+        //如果是beta版本，则直接置为beta
+        return "beta";
+    }
+    const match = version.match(/^([^-]+)/);
+    if (!match?.[1]) {
+        log.error(`无法获取${version}的版本号`);
+        return undefined;
+    }
+    return match[1];
 }
