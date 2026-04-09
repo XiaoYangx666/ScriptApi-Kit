@@ -4,19 +4,23 @@ import chalk from "chalk";
 import { program } from "commander";
 import { buildMain } from "./apps//build.js";
 import { copyToGame } from "./apps/copy.js";
-import { init } from "./apps/init.js";
+import { genCmdRouter } from "./apps/gen.js";
+import { init, installDependencies } from "./apps/init.js";
 import { runPack } from "./apps/pack.js";
 import { update } from "./apps/update.js";
 import { runDev } from "./apps/watch.js";
+import "./gen/index.js";
 import { ConfigManager } from "./utils/config.js";
 
 export function cliMain() {
+    program.name("sapi-kit").version("0.2.3");
+
     // 构建行为包
     program
         .command("build")
         .description("构建行为包")
         .action(() => {
-            buildMain({ value: false });
+            buildMain(true, true);
         });
 
     // 打包项目
@@ -52,6 +56,14 @@ export function cliMain() {
         });
 
     program
+        .command("install")
+        .alias("i")
+        .description("安装mc依赖")
+        .action(() => {
+            installDependencies();
+        });
+
+    program
         .command("init")
         .description("初始化项目模板")
         .option("-f, --force", "是否覆盖已有文件")
@@ -59,12 +71,6 @@ export function cliMain() {
             init(!!options.force);
         });
 
-    program
-        .command("version")
-        .description("查看当前版本")
-        .action(() => {
-            console.log("版本 0.2.1");
-        });
     program
         .command("check")
         .description("检查当前配置")
@@ -83,6 +89,24 @@ export function cliMain() {
                 if (err instanceof Error) {
                     console.log(chalk.red(err.message));
                 }
+            }
+        });
+
+    program
+        .command("gen [type] [name]") // 👈 改这里
+        .alias("g")
+        .description("生成文件")
+        .action(async (type, name) => {
+            // ✅ 没传 type → 直接显示表格
+            if (!type) {
+                console.log(genCmdRouter.getHelpText());
+                return;
+            }
+
+            try {
+                await genCmdRouter.run(type, name ? [name] : []);
+            } catch (err: any) {
+                console.error("错误:", err.message);
             }
         });
 

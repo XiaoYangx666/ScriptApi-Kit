@@ -54,15 +54,12 @@ export interface dependency {
     version: string;
 }
 
-type version = [number, number, number];
-export interface manifest {
-    format_version: number;
-    header: {
-        description: string;
-        name: string;
-        uuid: string;
-        version: version;
-        min_engine_version: version;
+    /**生成命令默认设置 */
+    gen?: {
+        /**items等使用的版本*/
+        format_version?: string;
+        /**maniFest的format_version */
+        manifest?: number;
     };
     modules: [
         {
