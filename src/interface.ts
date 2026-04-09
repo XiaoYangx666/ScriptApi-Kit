@@ -4,6 +4,8 @@ export interface sapiKitConfig {
     bpRoot?: string;
     /**材质包根目录 */
     rpRoot?: string;
+    /**源代码的目录 */
+    srcDir?: string;
 
     //build配置
     /**打包缓存目录
@@ -47,12 +49,6 @@ export interface sapiKitConfig {
     includeVersionInName?: boolean;
     /** 是否使用逗号格式的版本号如 v1,x,x 以兼容某些玩家导入问题 */
     useCommaStyleVersion?: boolean;
-}
-
-export interface dependency {
-    module_name: string;
-    version: string;
-}
 
     /**生成命令默认设置 */
     gen?: {
@@ -61,18 +57,9 @@ export interface dependency {
         /**maniFest的format_version */
         manifest?: number;
     };
-    modules: [
-        {
-            description: string;
-            type: string;
-            language: string;
-            uuid: string;
-            version: version;
-            entry: string;
-        },
-    ];
-    dependencies: dependency[];
 }
+
+export type version = [number, number, number] | string;
 
 interface overrides {
     [key: string]: {

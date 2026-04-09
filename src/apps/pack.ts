@@ -92,11 +92,12 @@ async function genPackInfo(type: packType): Promise<genPackInfo> {
         name = config.buildName(name, manifestData.header.version);
     } else {
         if (config.includeVersionInName) {
-            name =
-                name +
-                manifestData.header.version.join(
-                    config.useCommaStyleVersion ? "," : "."
-                );
+            const version = manifestData.header.version;
+            const versionStr =
+                typeof version == "string"
+                    ? version
+                    : version.join(config.useCommaStyleVersion ? "," : ".");
+            name = name + versionStr;
         }
         name += `_${type}`;
     }

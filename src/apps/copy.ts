@@ -3,10 +3,10 @@ import { existsSync, lstatSync, readdirSync } from "fs";
 import { cp, mkdir, rm } from "fs/promises";
 import os from "os";
 import path from "path";
-import { formatTime } from "../utils/func.js";
 import { packType, sapiKitConfig } from "../interface.js";
-import { bpManifest, rpManifest } from "../utils/manifest.js";
 import { ConfigManager } from "../utils/config.js";
+import { formatTime } from "../utils/func.js";
+import { bpManifest, rpManifest } from "../utils/manifest.js";
 
 const bpFiles = new Set([
     "scripts",
@@ -33,7 +33,10 @@ const bpFiles = new Set([
 const BPFolderName = "development_behavior_packs";
 const RPFolderName = "development_resource_packs";
 
-export async function copyToGame() {
+/**复制bp/rp目录到游戏
+ * @param type 指定只复制bp/rp，不传则都复制
+ */
+export async function copyToGame(type?: "bp" | "rp") {
     //尝试加载配置
     const config = await ConfigManager.get();
     // 验证配置
@@ -55,8 +58,12 @@ export async function copyToGame() {
 
     // 复制行为包与资源包
     await Promise.all([
-        config.bpRoot && copyPackFolder(gameRootDir, packType.BP),
-        config.rpRoot && copyPackFolder(gameRootDir, packType.RP),
+        config.bpRoot &&
+            (!type || type == "bp") &&
+            copyPackFolder(gameRootDir, packType.BP),
+        config.rpRoot &&
+            (!type || type == "rp") &&
+            copyPackFolder(gameRootDir, packType.RP),
     ]);
     console.log(`${formatTime()} ${chalk.magenta("[复制]")}复制完成`);
 }
@@ -87,14 +94,14 @@ async function copyPackFolder(gameRootPath: string, packType: packType) {
         throw new Error(`[复制] ${rootName} 目录不存在 : ${packRootPath}`);
     }
 
-    const src = isBP ? config.bpRoot : config.rpRoot;
+    const source = isBP ? config.bpRoot : config.rpRoot;
 
-    if (!src) {
+    if (!source) {
         throw new Error(`[复制] ${isBP ? "行为包" : "资源包"}目录未配置`);
     }
-    if (!existsSync(src)) {
+    if (!existsSync(source)) {
         throw new Error(
-            `[复制] ${isBP ? "行为包" : "资源包"}目录不存在:  ${src}`
+            `[复制] ${isBP ? "行为包" : "资源包"}目录不存在:  ${source}`
         );
     }
 
@@ -115,10 +122,10 @@ async function copyPackFolder(gameRootPath: string, packType: packType) {
 
     console.log(
         `${formatTime()} ${chalk.magenta("[复制]")} ${chalk.grey(
-            src
+            source
         )} -> ${chalk.grey(destDir)}`
     );
-    await copyFiles(src, destDir, false, packType);
+    await copyFiles(source, destDir, false, packType);
 }
 
 /**

@@ -34,3 +34,12 @@ export function exitIfCancel<T>(value: T): Exclude<T, symbol> {
     return value as Exclude<T, symbol>;
 }
 
+export function isSubDir(parent: string, child: string) {
+    const relative = path.relative(parent, child);
+
+    return (
+        relative && // 不是同一个目录
+        !relative.startsWith("..") && // 不在父目录外
+        !path.isAbsolute(relative) // 不是绝对路径（防止跨盘）
+    );
+}

@@ -17,12 +17,10 @@ import { copyToGame } from "./copy.js";
 
 //build主函数
 export async function runBuild(
-    isBuilding: { value: boolean },
-    isClearCache = true,
+    isClearCache: boolean,
+    initialBuild: boolean,
     rollupCache?: { value?: RollupCache }
 ) {
-    isBuilding.value = true;
-
     const startTime = Date.now();
     const outPutDir = await ConfigManager.getPackPath(packType.BP, "scripts");
 
@@ -92,7 +90,9 @@ export async function runBuild(
         );
 
         //拷贝到游戏目录
-        if (config.shouldCopyToGame) await copyToGame();
+        if (config.shouldCopyToGame) {
+            await copyToGame(initialBuild ? undefined : "bp");
+        }
 
         const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
         console.log(
@@ -110,8 +110,6 @@ export async function runBuild(
     if (isClearCache) {
         clearCache();
     }
-
-    isBuilding.value = false;
 }
 
 function compileTS(usenpx: boolean, useTsGo: boolean) {
@@ -175,11 +173,8 @@ export async function clearCache() {
     return safeDelete(config.cacheDir, 3);
 }
 
-export async function buildMain(
-    isBuilding: { value: boolean },
-    isClearCache = true
-) {
+export async function buildMain(isClearCache: boolean, initialBuild: boolean) {
     await clearCache();
     // 启动构建
-    runBuild(isBuilding, isClearCache);
+    runBuild(isClearCache, initialBuild);
 }
