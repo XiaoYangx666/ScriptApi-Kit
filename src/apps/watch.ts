@@ -13,11 +13,14 @@ const cache: { value: RollupCache | undefined } = { value: undefined };
 
 export async function runDev() {
     const config = await ConfigManager.get();
-    const srcDir = config.srcDir ?? "src";
-    const { bpRoot, rpRoot, shouldCopyToGame } = config;
 
+    const srcDir = normalizeRelPath(config.srcDir ?? "src");
+    const bpRoot = config.bpRoot ? normalizeRelPath(config.bpRoot) : null;
+    const rpRoot = config.rpRoot ? normalizeRelPath(config.rpRoot) : null;
+    const { shouldCopyToGame } = config;
+    // 收集监听路径
     const paths = [srcDir];
-    //如果需要复制，则同时监听bp和rp目录
+
     if (shouldCopyToGame) {
         if (bpRoot && existsSync(bpRoot)) {
             paths.push(bpRoot);
@@ -26,8 +29,17 @@ export async function runDev() {
             paths.push(rpRoot);
         }
     }
+    const ignoreDir = bpRoot ? `${bpRoot}/scripts` : null;
 
-    const watcher = chokidar.watch(paths, { ignoreInitial: true });
+    const watcher = chokidar.watch(paths, {
+        ignoreInitial: true,
+        ignored: ignoreDir
+            ? (val) => {
+                  const normalized = normalizeRelPath(val);
+                  return normalized.startsWith(ignoreDir);
+              }
+            : undefined,
+    });
 
     // 启动监听源代码
     watcher.on("change", (filePath) => {
@@ -38,16 +50,16 @@ export async function runDev() {
         console.log(`${formatTime()} ${chalk.yellow("[变更]")} ${filePath}`);
         //构建
         if (paths.length == 1 || isSubDir(srcDir, filePath)) {
-            withLock(() => {
-                return runBuild(false, false, cache);
+            withLock(async () => {
+                await runBuild(false, false, cache);
             });
         } else if (shouldCopyToGame) {
             //若需要复制则
             const isBp = bpRoot ? isSubDir(bpRoot, filePath) : false;
             const isRp = rpRoot ? isSubDir(rpRoot, filePath) : false;
             const type = isBp ? "bp" : isRp ? "rp" : undefined;
-            withLock(() => {
-                return copyToGame(type);
+            withLock(async () => {
+                await copyToGame(type);
             });
         }
     });
@@ -71,4 +83,8 @@ async function withLock(func: () => void | Promise<void>) {
         console.error(`${formatTime()} ${chalk.redBright("失败 ❌")}`);
     }
     isBuilding.value = false;
+}
+
+function normalizeRelPath(p: string) {
+    return p.replace(/^[.][\\/]/, "");
 }
