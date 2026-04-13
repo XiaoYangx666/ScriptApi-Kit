@@ -21,6 +21,8 @@ export interface sapiKitConfig {
     useNpx?: boolean;
     /**是否使用Typescript Go版本进行编译 */
     useTsGo?: boolean;
+    /**是否保留模块划分，默认是 */
+    preserveModules?: boolean;
 
     //copy配置
     /** 构建完成后是否自动复制行为包到游戏目录 */
@@ -57,6 +59,14 @@ export interface sapiKitConfig {
         /**maniFest的format_version */
         manifest?: number;
     };
+    /**自定义钩子 */
+    hooks?: {
+        afterBundle?: (ctx: HookContext) => void | Promise<void>;
+    };
+}
+
+export interface HookContext {
+    outputDir: string;
 }
 
 export type version = [number, number, number] | string;

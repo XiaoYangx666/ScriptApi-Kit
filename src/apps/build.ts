@@ -76,7 +76,7 @@ export async function runBuild(
         await bundle.write({
             dir: outPutDir,
             format: "es",
-            preserveModules: true,
+            preserveModules: config.preserveModules ?? true,
             preserveModulesRoot: config.cacheDir,
         });
         //保存cache
@@ -88,6 +88,15 @@ export async function runBuild(
         console.log(
             `${formatTime()} ${chalk.greenBright("[Rollup]")} 打包完成 ✔️`
         );
+
+        //执行hook
+        const afterBundle = config.hooks?.afterBundle;
+        if (afterBundle) {
+            await afterBundle({ outputDir: outPutDir });
+            console.log(
+                `${formatTime()} ${chalk.yellowBright("[Hook]")} 已执行afterBundle Hook`
+            );
+        }
 
         //拷贝到游戏目录
         if (config.shouldCopyToGame) {
