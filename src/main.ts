@@ -19,8 +19,13 @@ export function cliMain() {
     program
         .command("build")
         .description("构建行为包")
-        .action(() => {
-            buildMain(true, true);
+        .option("--skip-copy", "跳过拷贝到游戏目录")
+        .option("--skip-hook", "跳过hook执行")
+        .action((options) => {
+            buildMain(true, true, {
+                skipCopy: options.skipCopy,
+                skipHook: options.skipHook,
+            });
         });
 
     // 打包项目

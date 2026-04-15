@@ -15,11 +15,17 @@ import { TSCError } from "../utils/errors.js";
 import { formatTime } from "../utils/func.js";
 import { copyToGame } from "./copy.js";
 
+interface buildOptions {
+    skipCopy?: boolean;
+    skipHook?: boolean;
+}
+
 //build主函数
 export async function runBuild(
     isClearCache: boolean,
     initialBuild: boolean,
-    rollupCache?: { value?: RollupCache }
+    rollupCache?: { value?: RollupCache },
+    options?: buildOptions
 ) {
     const startTime = Date.now();
     const outPutDir = await ConfigManager.getPackPath(packType.BP, "scripts");
@@ -91,7 +97,7 @@ export async function runBuild(
 
         //执行hook
         const afterBundle = config.hooks?.afterBundle;
-        if (afterBundle) {
+        if (afterBundle && !options?.skipHook) {
             await afterBundle({ outputDir: outPutDir });
             console.log(
                 `${formatTime()} ${chalk.yellowBright("[Hook]")} 已执行afterBundle Hook`
@@ -99,7 +105,7 @@ export async function runBuild(
         }
 
         //拷贝到游戏目录
-        if (config.shouldCopyToGame) {
+        if (config.shouldCopyToGame && !options?.skipCopy) {
             await copyToGame(initialBuild ? undefined : "bp");
         }
 
@@ -182,8 +188,12 @@ export async function clearCache() {
     return safeDelete(config.cacheDir, 3);
 }
 
-export async function buildMain(isClearCache: boolean, initialBuild: boolean) {
+export async function buildMain(
+    isClearCache: boolean,
+    initialBuild: boolean,
+    options?: buildOptions
+) {
     await clearCache();
     // 启动构建
-    runBuild(isClearCache, initialBuild);
+    runBuild(isClearCache, initialBuild, undefined, options);
 }
